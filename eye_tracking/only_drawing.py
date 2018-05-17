@@ -25,45 +25,80 @@ def draw_rect(event, x, y, flags, param) :
         center_x, center_y = int((x + ix)/2), int((y + iy)/2)
         width, height = int((x - ix)), int((y - iy))
 
-def draw_rectangle(i) :
+def draw_rectangle(last_num) :
     global center_x, center_y, width, height, drawn, list, list2, img, img2
-    j = 0
+    if last_num :
+        j = last_num
+        print("j : %d"%j)
+    else :
+        j = 0
     list = []
     list2 = []
     while True :
-        name = 'dataset/%d/%d.jpg'%(i, j)
+        name = 'dataset/%d.jpg'%j
 
         img = cv2.imread(name)
 
         print('name : ', name)
         cv2.namedWindow('test')
-        cv2.moveWindow('test', -10, -10)
+        #cv2.moveWindow('test', -10, -10)
         cv2.setMouseCallback('test', draw_rect, param=img)
         while True :
             try:
                 cv2.imshow('test', img)
             except :
+                print('no image')
+                final_num = str(j)
+                fo.write(final_num)
+                # np.savetxt(fo, final_num, fmt="%d")
+                sys.exit()
 
                 print('no image')
+                final_num = str(j)
+                fo.write(final_num)
+                # np.savetxt(fo, final_num, fmt="%d")
                 sys.exit()
+
             img2 = img.copy()
-            if cv2.waitKey(0) :
-                break
+            if cv2.waitKey(0):
+                if cv2.waitKey(0) & 0xFF == ord('q'):
+                    print('brak')
+                    final_num = str(j)
+                    fo.write(final_num)
+                    #np.savetxt(fo, final_num, fmt="%d")
+                    break
+                else :
+                    break
         if drawn:
             pt1 = (int(center_x - (width / 2)), int(center_y + (height / 2)))
             pt2 = (int(center_x + (width / 2)), int(center_y - (height / 2)))
-            list2 = (j, pt1[0], pt1[1], pt2[0], pt2[1])
-            list = np.vstack((list, list2))
+            list = np.array([[j, pt1[0], pt1[1], pt2[0], pt2[1]]])
             print('list : ', list)
-            np.savetxt('dataset/%d/eyesPos.csv' % i, list, fmt='%d', delimiter=',', newline='\n', footer='num, pt1_x, pt1_y, pt2_x, pt2_y')
-
+            np.savetxt(f, list, fmt='%d', delimiter=',')
         j += 1
 
         cv2.destroyAllWindows()
 
 if __name__ == "__main__" :
-    start = input('folder you want to edit')
-    start = int(start)
-    os.chdir('/home/leejin/git/image_processing/eye-tracking')
+    last_num = None
+    try:
+        fo = open('dataset/last_num.txt', 'r')
+        print('mode r')
+    except:
+        fo = open('dataset/last_num.txt', 'w')
+        print('mode w')
 
-    draw_rectangle(start)
+    if fo.mode == 'r':
+        num = fo.readline()
+        fo = open('dataset/last_num.txt', 'w')
+        if num=='':
+            last_num = 0
+            print("last_num : %d" % last_num)
+        else:
+
+            last_num = int(num)
+            print("last_num : %d" % last_num)
+    else:
+        last_num = 0
+    f = open('dataset/eyesPos.csv', 'a+')
+    draw_rectangle(last_num)
