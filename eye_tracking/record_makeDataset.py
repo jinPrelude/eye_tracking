@@ -47,8 +47,6 @@ def writeVideo(last_num) :
     try :
         print('camera start')
         cap = cv2.VideoCapture(0)
-
-
     except :
         print('camera setting failed')
 
@@ -166,4 +164,7 @@ if __name__ == "__main__" :
     if (will == 'y') :
         draw_rectangle(last_num)
     elif(will == 'n') :
-        pass
+        print("last_num : ", last_num)
+        last_num = str(last_num)
+        fo.write(last_num)
+        fo.close()
