@@ -110,9 +110,9 @@ def draw_rectangle(last_num) :
                 #np.savetxt(fo, final_num, fmt="%d")
                 sys.exit()
             img2 = img.copy()
-
-            if cv2.waitKey(0):
-                if cv2.waitKey(0) & 0xFF == ord('q'):
+            k = cv2.waitKey(0)
+            if k:
+                if k & 0xFF == ord('q'):
                     print('brak')
                     final_num = str(j)
                     fo.write(final_num)
