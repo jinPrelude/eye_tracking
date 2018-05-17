@@ -41,7 +41,7 @@ def draw_rect(event, x, y, flags, param) :
         width, height = int((x - ix)), int((y - iy))
 
 
-def writeVideo(i) :
+def writeVideo(last_num) :
 
     global recordStart, recordEnd
     try :
@@ -53,7 +53,11 @@ def writeVideo(i) :
         print('camera setting failed')
 
 
-    j = 0
+    if last_num :
+        j = last_num
+        print("j : %d"%j)
+    else :
+        j = 0
     while True :
         ret, frame = cap.read()
 
@@ -64,10 +68,10 @@ def writeVideo(i) :
         cv2.imshow('video', frame)
         cv2.setMouseCallback('video', onMouse)
         if recordStart:
-            cv2.imwrite('dataset/' + '%d'%i + '/%d.jpg'%j, frame)
+            cv2.imwrite('dataset/' +'%d.jpg'%j, frame)
             j += 1
         if cv2.waitKey(1) & 0xFF == ord('q') :
-            sys.exit()
+            pass
         elif recordEnd == True :
             print('finish record')
             recordEnd = False
@@ -80,55 +84,86 @@ def writeVideo(i) :
     cv2.destroyAllWindows()
 
 
-def draw_rectangle(i) :
+def draw_rectangle(last_num) :
     global center_x, center_y, width, height, drawn, list, list2, img, img2
-    j = 0
+    if last_num :
+        j = last_num
+        print("j : %d"%j)
+    else :
+        j = 0
     list = np.array([0,0,0,0,0])
     list2 = np.array([0,0,0,0,0])
     while True :
-        name = 'dataset/%d/%d.jpg'%(i, j)
+        name = 'dataset/%d.jpg'%j
 
         img = cv2.imread(name)
 
         print('name : ', name)
         cv2.namedWindow('test')
-        cv2.moveWindow('test', -10, -10)
+        #cv2.moveWindow('test', -10, -10)
         cv2.setMouseCallback('test', draw_rect, param=img)
         while True :
             try:
                 cv2.imshow('test', img)
             except :
-
                 print('no image')
+                final_num = str(j)
+                fo.write(final_num)
+                #np.savetxt(fo, final_num, fmt="%d")
                 sys.exit()
             img2 = img.copy()
-            if cv2.waitKey(0) :
-                break
+
+            if cv2.waitKey(0):
+                if cv2.waitKey(0) & 0xFF == ord('q'):
+                    print('brak')
+                    final_num = str(j)
+                    fo.write(final_num)
+                    #np.savetxt(fo, final_num, fmt="%d")
+                    break
+                else :
+                    break
+
         if drawn:
             pt1 = (int(center_x - (width / 2)), int(center_y + (height / 2)))
             pt2 = (int(center_x + (width / 2)), int(center_y - (height / 2)))
-            list2 = (j, pt1[0], pt1[1], pt2[0], pt2[1])
-            list = np.vstack((list, list2))
+            list = np.array([[j, pt1[0], pt1[1], pt2[0], pt2[1]]])
             print('list : ', list)
-            np.savetxt('dataset/%d/eyesPos.csv' % i, list, fmt='%d', delimiter=',', newline='\n', footer='num, pt1_x, pt1_y, pt2_x, pt2_y')
+            np.savetxt(f, list, fmt='%d', delimiter=',')
+            #f.write("%d,%d,%d,%d,%d\n"%(j, pt1[0], pt1[1], pt2[0], pt2[1]))
+
+
 
         j += 1
 
         cv2.destroyAllWindows()
 if __name__ == "__main__" :
-    start = input('start point')
-    start = int(start)
-    for i in range(start, 10000) :
-        os.chdir('/home/leejin/git/image_processing/eye-tracking')
+    last_num = None
 
-        try :
-            os.mkdir('dataset/%d'%i, 0o777)
-        except :
-            pass
+    try:
+        fo = open('dataset/last_num.txt', 'r')
+        print('mode r')
+    except:
+        fo = open('dataset/last_num.txt', 'w')
+        print('mode w')
 
-        writeVideo(i)
-        will = input('do you want to draw rectangles right now? yes : y, no : n')
-        if (will == 'y') :
-            draw_rectangle(i)
+    if fo.mode == 'r' :
+        num = fo.readline()
+        fo = open('dataset/last_num.txt', 'w')
+        if num == 0 :
+            last_num = 0
+            print("last_num : %d"%last_num)
         else :
-            break
+
+            last_num =  int(num)
+            print("last_num : %d"%last_num)
+    else :
+        last_num = 0
+
+    f = open('dataset/eyesPos.csv', 'a+')
+    #os.chdir('/home/leejin/git/eye_tracking/eye-tracking')
+    writeVideo(last_num)
+    will = input('do you want to draw rectangles right now? yes : y, no : n')
+    if (will == 'y') :
+        draw_rectangle(last_num)
+    elif(will == 'n') :
+        pass
