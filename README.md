@@ -5,8 +5,10 @@ The goal of this project is making eye-tracking mouse-control software using Con
 ### record_makeDataset
 - This code will record the videos via your webcam, And allow you to choose whether to draw rectangles on the images(which is separated by a frame), or leave it for a while and do using 'only_drawing.py'. By doing so, you can generate the dataset of the eyes-position.<br>
 - Dataset will be stored in dataset folder, positions of the rectangles will be saved in 'eyesPos.csv', and the last number that you've generated rectangles' position will be saved in 'last_num.txt'
-<img src=gif/recording.gif width="245px"/>
-<img src=gif/drawing.gif width="245px"/>
+<div align="center">
+<img style="display:inline;" src=gif/recording.gif width="245px"/>
+<img style="display:inline;" src=gif/drawing.gif width="245px"/>
+</div>
 <br>
 <br>
 
