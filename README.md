@@ -1,5 +1,5 @@
 # Eye-tracking
-The goal of this project is making eye-tracking software using ConvNet and OpenCV. Each descriptions of the codes in this project is below.
+The goal of this project is making eye-tracking mouse-control software using ConvNet and OpenCV. Each descriptions of the codes in this project is below.
 
 ## descriptions
 ### record_makeDataset
