@@ -122,9 +122,12 @@ def draw_rectangle(last_num) :
                     break
 
         if drawn:
+            """ 
             pt1 = (int(center_x - (width / 2)), int(center_y + (height / 2)))
             pt2 = (int(center_x + (width / 2)), int(center_y - (height / 2)))
             list = np.array([[j, pt1[0], pt1[1], pt2[0], pt2[1]]])
+            """
+            list = np.array([center_x, center_y, width, height])
             print('list : ', list)
             np.savetxt(f, list, fmt='%d', delimiter=',')
             #f.write("%d,%d,%d,%d,%d\n"%(j, pt1[0], pt1[1], pt2[0], pt2[1]))

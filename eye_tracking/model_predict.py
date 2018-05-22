@@ -6,13 +6,12 @@ import os
 img_width = 100
 img_height = 100
 
-os.chdir('/home/leejin/git/image_processing/eye-tracking')
-2
 
-X = tf.placeholder(tf.float32, [None, img_height, img_width, 3])
+X = tf.placeholder(tf.float32, [None, img_height, img_width, 1])
 Y = tf.placeholder(tf.float32, [None, 4])
+keep_prob = tf.placeholder(tf.float32)
 
-W1 = tf.get_variable('W1',[3, 3, 3, 32],dtype=tf.float32, initializer=tf.keras.initializers.he_normal())
+W1 = tf.get_variable('W1',[3, 3, 1, 32],dtype=tf.float32, initializer=tf.keras.initializers.he_normal())
 L1 = tf.nn.conv2d(X, W1,strides=[1,1,1,1], padding='SAME')
 L1 = tf.nn.relu(L1)
 L1 = tf.nn.max_pool(L1, ksize=[1,2,2,1], strides=[1,2,2,1], padding='SAME')
@@ -48,6 +47,7 @@ L7 = tf.nn.relu(L7)
 W8 = tf.get_variable('W8', [64, 8], dtype=tf.float32, initializer=tf.keras.initializers.he_normal())
 L8 = tf.matmul(L7, W8)
 L8 = tf.nn.relu(L8)
+L8 = tf.nn.dropout(L8, keep_prob)
 
 W9 = tf.get_variable('W9', [8, 8], dtype=tf.float32, initializer=tf.keras.initializers.he_normal())
 L9 = tf.matmul(L8, W9)
@@ -56,9 +56,9 @@ L9 = tf.nn.relu(L9)
 W10 = tf.get_variable('W10', [8, 4], dtype=tf.float32, initializer=tf.keras.initializers.he_normal())
 
 L10 = tf.matmul(L9, W10)
+L10 = tf.nn.softmax(L10)
 
-
-ckpt = tf.train.get_checkpoint_state('./model_save_big')
+ckpt = tf.train.get_checkpoint_state('./model_save')
 
 init = tf.global_variables_initializer()
 sess = tf.Session()
@@ -70,36 +70,42 @@ saver.restore(sess, ckpt.model_checkpoint_path)
 print("reload")
 
 
-def imgshow(i, num) :
+def imgshow() :
+    i = 0
 
-    cv2.namedWindow('test')
-    img = cv2.imread('dataset/%d/%d.jpg'%(num,i))
-    label = list[i][:]
+    while True:
 
-    img2 = cv2.resize(img, (100, 100))
-    img2 = img2[np.newaxis,:,:,:]
-    tmp = sess.run(L10, feed_dict={X:img2})
-    pt1_x, pt1_y, pt2_x, pt2_y = tmp[0][0], tmp[0][1], tmp[0][2], tmp[0][3]
-    pt1 = (pt1_x, pt1_y)
-    pt2 = (pt2_x, pt2_y)
-    print(pt1, pt2)
-    print((label[1], label[2]), (label[3], label[4]))
-    while True :
+        cv2.namedWindow('test')
+        img = cv2.imread('dataset/%d.jpg'%(i), cv2.IMREAD_GRAYSCALE)
 
-        cv2.rectangle(img, pt1=pt1, pt2=pt2, color=(225, 0, 0), thickness=3)
-        cv2.rectangle(img, pt1=(label[1], label[2]), pt2=(label[3], label[4]), color=(0,225,0), thickness=3 )
-        cv2.imshow('test', img)
+        label = list[i][:]
 
-        if cv2.waitKey(0) :
-            cv2.destroyAllWindows()
-            break
+        img2 = cv2.resize(img, (100, 100))
+        img2 = np.resize(img2, (100,100,1))
 
-num = input('number of folder')
-num = int(num)
-for i in range(1000) :
+        img2 = img2[np.newaxis,:,:,:]
+        tmp = sess.run(L10, feed_dict={X:img2, keep_prob:1})
+        center_x, center_y, width, height = tmp[0][0], tmp[0][1], tmp[0][2], tmp[0][3]
+        pt1_x, pt1_y, pt2_x, pt2_y = center_x-(width/2), center_y+(height/2), center_x+(width/2), center_y-(width/2)
+        pt1 = (pt1_x, pt1_y)
+        pt2 = (pt2_x, pt2_y)
+        print(pt1, pt2)
+        print((label[1], label[2]), (label[3], label[4]))
 
-    list = np.loadtxt('dataset/%d/eyesPos.csv'%num, dtype='int', delimiter=',')
+        while True:
+            cv2.rectangle(img, pt1=pt1, pt2=pt2, color=(225, 0, 0), thickness=3)
+            cv2.rectangle(img, pt1=(label[1], label[2]), pt2=(label[3], label[4]), color=(0,225,0), thickness=3 )
+            cv2.imshow('test', img)
+            k = cv2.waitKey(0)
+            if k :
+                cv2.destroyAllWindows()
 
-    imgshow(i, num)
+                break
+        i += 1
+
+num = 0
+list = np.loadtxt('dataset/eyesPos.csv', dtype='int', delimiter=',')
+
+imgshow()
 
 

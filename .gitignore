@@ -106,6 +106,7 @@ venv.bak/
 
 #custom
 eye_tracking/dataset/
+eye_tracking/model_save/
 eye_tracking/save_model/eye_track_model.ckpt.data-00000-of-00001
 eye_tracking/save_model/eye_track_model.ckpt.index
 eye_tracking/save_model/eye_track_model.ckpt.meta
