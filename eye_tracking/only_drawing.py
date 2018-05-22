@@ -41,7 +41,7 @@ def draw_rectangle(last_num) :
 
         print('name : ', name)
         cv2.namedWindow('test')
-        #cv2.moveWindow('test', -10, -10)
+        cv2.moveWindow('test', 800, 0)
         cv2.setMouseCallback('test', draw_rect, param=img)
         while True :
             try:
@@ -60,8 +60,9 @@ def draw_rectangle(last_num) :
                 sys.exit()
 
             img2 = img.copy()
-            if cv2.waitKey(0):
-                if cv2.waitKey(0) & 0xFF == ord('q'):
+            k = cv2.waitKey(0)
+            if k:
+                if k & 0xFF == ord('q'):
                     print('brak')
                     final_num = str(j)
                     fo.write(final_num)
@@ -75,7 +76,7 @@ def draw_rectangle(last_num) :
             pt2 = (int(center_x + (width / 2)), int(center_y - (height / 2)))
             list = np.array([[j, pt1[0], pt1[1], pt2[0], pt2[1]]])
             """
-            list = np.array([center_x, center_y, width, height])
+            list = ([center_x, center_y, width, height])
             print('list : ', list)
             np.savetxt(f, list, fmt='%d', delimiter=',')
         j += 1
